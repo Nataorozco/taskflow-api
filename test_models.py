@@ -1,7 +1,7 @@
 from app.domain.models.task import Task, TaskStatus, TaskPriority
 from app.domain.models.user import User
 from app.domain.models.document import Document, DocumentType
-
+# Nota este solo es un ejemplo para probar si los modelos funcionan no hacen parte de la aplicación final, se puede eliminar después de probar los modelos
 # Probando el modelo User
 user = User(
     email="natalia@example.com",
