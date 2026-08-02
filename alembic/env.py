@@ -5,6 +5,7 @@ from alembic import context
 
 from app.infrastructure.database import Base
 from app.infrastructure.orm_models.task_orm import TaskORM
+from app.infrastructure.orm_models.user_orm import UserORM
 from app.core.config import DB_HOST, DB_NAME, DB_USER, DB_PASSWORD, DB_PORT
 
 config = context.config
