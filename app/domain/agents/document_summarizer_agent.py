@@ -36,20 +36,28 @@ class DocumentSummarizerAgent(BaseAgent):
 
     def _simulate_summary(self, document: Document) -> dict:
         """
-        Resumen simulado, sin LLM. Usa reglas simples sobre el texto
-        para dar una idea aproximada del contenido.
+        Resumen simulado, sin LLM. Estas reglas son deliberadamente
+        simples (no intentan "entender" el texto) — su único propósito
+        es dar una salida con la MISMA FORMA que va a tener la respuesta
+        real del LLM, para poder construir y probar el resto del sistema
+        (endpoints, guardado en base de datos, etc.) sin esperar a tener
+        la integración con Claude lista.
         """
         words = document.content.split()
         word_count = len(words)
 
-        # Estimación de tiempo de lectura: ~200 palabras por minuto
+        # Estimación estándar de velocidad de lectura: ~200 palabras
+        # por minuto es un promedio ampliamente usado como referencia.
         reading_time_minutes = max(1, round(word_count / 200))
 
-        # Resumen simulado: primeras ~30 palabras del contenido
+        # Resumen simulado: simplemente las primeras ~30 palabras.
+        # Un LLM real generaría un resumen genuino, no un recorte.
         preview = " ".join(words[:30])
         simulated_summary = f"{preview}..." if word_count > 30 else preview
 
-        # Palabras clave simuladas: las 5 palabras más largas (aproximación simple)
+        # Palabras clave simuladas: aproximación muy básica usando
+        # las 5 palabras más largas del texto (sin repetir). Un LLM
+        # real identificaría conceptos importantes, no solo longitud.
         keywords = sorted(set(words), key=len, reverse=True)[:5]
 
         return {
@@ -63,7 +71,9 @@ class DocumentSummarizerAgent(BaseAgent):
     def _call_llm(self, document: Document) -> dict:
         """
         Punto de integración real con Claude.
-        El prompt maestro para este agente se define por separado.
+        El prompt maestro para este agente se define por separado
+        (con ChatGPT, según el flujo de trabajo definido para el
+        proyecto).
         """
         # TODO: implementar llamada real a la API de Anthropic
         raise NotImplementedError("Integración con LLM pendiente de implementar")

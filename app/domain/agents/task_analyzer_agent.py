@@ -17,6 +17,10 @@ class TaskAnalyzerAgent(BaseAgent):
         try:
             self.log(f"Analizando tarea: '{task.title}'")
 
+            # Decisión de diseño clave: si no hay API key configurada,
+            # usamos análisis simulado en vez de fallar. Esto permite
+            # desarrollar y probar todo el pipeline del agente sin
+            # depender de tener una cuenta de Claude activa todavía.
             if not ANTHROPIC_API_KEY:
                 self.log("⚠️ No hay API key configurada, usando análisis simulado")
                 analysis = self._simulate_analysis(task)
@@ -36,10 +40,16 @@ class TaskAnalyzerAgent(BaseAgent):
 
     def _simulate_analysis(self, task: Task) -> dict:
         """
-        Análisis simulado, sin LLM. Sirve para desarrollar y probar
-        el resto del pipeline mientras se define la integración real.
+        Análisis simulado, sin LLM. Usa reglas simples de Python en vez
+        de inteligencia artificial real, para poder desarrollar y probar
+        el resto del pipeline mientras se define la integración real
+        con Claude (los prompts se van a diseñar por separado, con ChatGPT).
         """
+        # Regla simple: títulos cortos se asumen más urgentes/directos.
         suggested_priority = TaskPriority.HIGH if len(task.title) < 20 else TaskPriority.MEDIUM
+
+        # Una tarea se considera "ambigua" si no tiene descripción,
+        # o si la descripción es demasiado corta para ser útil.
         is_ambiguous = task.description is None or len(task.description.strip()) < 10
 
         return {
@@ -52,8 +62,11 @@ class TaskAnalyzerAgent(BaseAgent):
     def _call_llm(self, task: Task) -> dict:
         """
         Punto de integración real con Claude.
-        Cuando se conecte la API, esta función reemplaza a _simulate_analysis
-        sin que el resto del agente necesite cambiar.
+
+        Diseño intencional: run() nunca cambia, sin importar si se usa
+        _simulate_analysis() o _call_llm() — solo decide cuál llamar según
+        si hay API key. Cuando se implemente esta función, el agente
+        completo empieza a funcionar con IA real, sin tocar nada más.
         """
         # TODO: implementar llamada real a la API de Anthropic
         # usando ANTHROPIC_API_KEY y LLM_MODEL

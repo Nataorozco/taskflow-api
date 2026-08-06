@@ -37,8 +37,11 @@ class ReminderAgent(BaseAgent):
 
     def _simulate_reminder(self, task: Task) -> dict:
         """
-        Lógica simulada, sin LLM. Calcula un recordatorio basado en
-        reglas simples de fecha y prioridad.
+        Lógica simulada, sin LLM. A diferencia de los otros agentes,
+        aquí no simulamos "como si fuera IA" — usamos reglas de fecha
+        que probablemente se mantengan incluso cuando se conecte el LLM,
+        porque calcular tiempo restante es una operación determinística,
+        no algo que necesite razonamiento de un modelo de lenguaje.
         """
         if task.due_date is None:
             return {
@@ -47,10 +50,15 @@ class ReminderAgent(BaseAgent):
                 "source": "simulated"
             }
 
+        # datetime.now(timezone.utc) en vez de datetime.now() a secas:
+        # así comparamos fechas con zona horaria de forma consistente,
+        # sin importar en qué zona horaria corra el servidor.
         now = datetime.now(timezone.utc)
         time_left = task.due_date - now
 
-        # Cuánto antes recordar, según la prioridad
+        # Cuánto antes recordar depende de la prioridad: una tarea de
+        # alta prioridad se recuerda con más anticipación (2 días) que
+        # una de baja prioridad (solo 6 horas antes).
         buffer_by_priority = {
             TaskPriority.HIGH: timedelta(days=2),
             TaskPriority.MEDIUM: timedelta(days=1),
@@ -78,7 +86,11 @@ class ReminderAgent(BaseAgent):
     def _call_llm(self, task: Task) -> dict:
         """
         Punto de integración real con Claude.
-        El prompt maestro para este agente se define por separado.
+        Nota: incluso con LLM real conectado, es probable que este agente
+        siga usando parte de la lógica de fechas de _simulate_reminder(),
+        y que el LLM solo se use para redactar el mensaje de forma más
+        natural — a diferenciar de otros agentes donde el LLM hace todo
+        el análisis.
         """
         # TODO: implementar llamada real a la API de Anthropic
         raise NotImplementedError("Integración con LLM pendiente de implementar")

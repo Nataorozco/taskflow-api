@@ -6,13 +6,23 @@ from app.core.config import ANTHROPIC_API_KEY, LLM_MODEL
 class WorkflowPlannerAgent(BaseAgent):
     """
     Convierte una meta en un plan de trabajo estructurado.
-    Es el agente más complejo: en el futuro puede orquestar a los
-    otros tres agentes (analizar cada paso, generar recordatorios, etc.)
+
+    Es el agente más complejo de los cuatro: a diferencia de los otros
+    tres (que analizan algo que ya existe), este CREA algo nuevo a partir
+    de una idea en texto libre. En el futuro puede orquestar a los otros
+    tres agentes — por ejemplo, un plan que incluya crear tareas ya
+    analizadas por TaskAnalyzerAgent y con recordatorios de ReminderAgent.
     """
 
     name = "WorkflowPlannerAgent"
 
     def run(self, goal: str, owner_id: int) -> dict:
+        """
+        Nota de diseño: run() recibe (goal: str, owner_id: int) en vez
+        de un objeto de dominio como los otros agentes (que reciben
+        Task o Document). Es intencional: este agente no analiza algo
+        existente, sino que construye un WorkflowPlan desde cero.
+        """
         try:
             self.log(f"Planificando meta: '{goal}'")
 
@@ -34,8 +44,11 @@ class WorkflowPlannerAgent(BaseAgent):
 
     def _simulate_plan(self, goal: str, owner_id: int) -> WorkflowPlan:
         """
-        Planificación simulada, sin LLM. Genera pasos genéricos
-        basados en una estructura estándar de proyecto.
+        Planificación simulada, sin LLM. Usa una estructura genérica de
+        5 pasos que aplica razonablemente bien a cualquier meta general
+        (investigar, dividir, ejecutar, revisar, cerrar) — no está
+        adaptada al contenido específico de la meta todavía; eso es
+        justamente lo que el LLM real va a aportar cuando se conecte.
         """
         generic_steps = [
             ("Investigar y definir el alcance", "Aclarar qué implica exactamente la meta antes de empezar."),
@@ -45,6 +58,9 @@ class WorkflowPlannerAgent(BaseAgent):
             ("Finalizar y documentar", "Cerrar la meta y dejar registro de lo aprendido."),
         ]
 
+        # El primer paso siempre se marca como alta prioridad (es el
+        # punto de partida obligatorio); el resto queda en prioridad
+        # media por defecto.
         steps = [
             PlannedStep(
                 order=i + 1,
