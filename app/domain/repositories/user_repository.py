@@ -5,6 +5,8 @@ from app.domain.models.user import User
 class UserRepository(ABC):
     """
     Contrato abstracto para persistir y consultar usuarios.
+    Mismo principio que TaskRepository: el dominio no sabe cómo se
+    implementa la persistencia, solo qué operaciones existen.
     """
 
     @abstractmethod
@@ -19,7 +21,13 @@ class UserRepository(ABC):
 
     @abstractmethod
     def get_by_email(self, email: str) -> User | None:
-        """Busca un usuario por su email. Útil para login. Devuelve None si no existe."""
+        """
+        Busca un usuario por su email. A diferencia de TaskRepository,
+        aquí no hay get_all_by_owner() (los usuarios no le pertenecen
+        a nadie) — en cambio, get_by_email() es clave porque va a ser
+        el método que use el futuro sistema de login para verificar
+        credenciales.
+        """
         raise NotImplementedError
 
     @abstractmethod

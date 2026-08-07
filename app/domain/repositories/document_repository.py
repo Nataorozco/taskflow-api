@@ -24,7 +24,12 @@ class DocumentRepository(ABC):
 
     @abstractmethod
     def get_all_by_task(self, task_id: int) -> list[Document]:
-        """Devuelve todos los documentos asociados a una tarea específica."""
+        """
+        Devuelve todos los documentos asociados a una tarea específica.
+        Existe porque, según el modelo de dominio, un Document puede
+        tener un task_id opcional — este método permite responder
+        "¿qué documentos tiene esta tarea?" de forma directa.
+        """
         raise NotImplementedError
 
     @abstractmethod
