@@ -5,7 +5,7 @@ from app.domain.models.user import User
 class InMemoryUserRepository(UserRepository):
     """
     Implementación en memoria del UserRepository.
-    Útil para tests y desarrollo rápido.
+    Mismo principio que InMemoryTaskRepository.
     """
 
     def __init__(self):
@@ -23,6 +23,10 @@ class InMemoryUserRepository(UserRepository):
         return self._users.get(user_id)
 
     def get_by_email(self, email: str) -> User | None:
+        # Como no hay índice real (esto es solo un diccionario en
+        # memoria), buscar por email requiere recorrer todos los
+        # usuarios uno por uno. En la versión real con SQLAlchemy,
+        # esto es mucho más eficiente gracias al índice de la columna.
         for user in self._users.values():
             if user.email == email:
                 return user
