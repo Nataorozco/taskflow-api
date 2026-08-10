@@ -7,6 +7,11 @@ from app.infrastructure.orm_models.document_orm import DocumentORM
 class SQLAlchemyDocumentRepository(DocumentRepository):
     """
     Implementación real del DocumentRepository, usando SQLAlchemy y Postgres.
+
+    Sigue exactamente el mismo patrón que SQLAlchemyTaskRepository y
+    SQLAlchemyUserRepository: recibe una sesión ya abierta desde afuera,
+    traduce entre Document (dominio) y DocumentORM (tabla), y expone los
+    mismos métodos definidos en la interfaz abstracta DocumentRepository.
     """
 
     def __init__(self, db: Session):
@@ -14,6 +19,8 @@ class SQLAlchemyDocumentRepository(DocumentRepository):
 
     def save(self, document: Document) -> Document:
         if document.id is None:
+            # Documento nuevo: construimos un DocumentORM a partir de
+            # los datos del Document de dominio, y lo agregamos a la sesión.
             document_orm = DocumentORM(
                 title=document.title,
                 content=document.content,
@@ -25,6 +32,8 @@ class SQLAlchemyDocumentRepository(DocumentRepository):
             )
             self.db.add(document_orm)
         else:
+            # Actualizar un documento existente: lo buscamos primero;
+            # si no existe, es un error real, no un caso silencioso.
             document_orm = self.db.query(DocumentORM).filter(DocumentORM.id == document.id).first()
             if document_orm is None:
                 raise ValueError(f"No existe un documento con id {document.id}")
@@ -34,7 +43,10 @@ class SQLAlchemyDocumentRepository(DocumentRepository):
             document_orm.task_id = document.task_id
             document_orm.summary = document.summary
 
+        # commit() escribe el cambio de verdad en Postgres.
         self.db.commit()
+        # refresh() recarga el objeto desde la base de datos, para
+        # obtener el id real asignado automáticamente (si era nuevo).
         self.db.refresh(document_orm)
         return self._to_domain(document_orm)
 
@@ -43,10 +55,16 @@ class SQLAlchemyDocumentRepository(DocumentRepository):
         return self._to_domain(document_orm) if document_orm else None
 
     def get_all_by_owner(self, owner_id: int) -> list[Document]:
+        # Gracias al index=True que definimos en DocumentORM.owner_id,
+        # esta consulta es eficiente incluso con muchos documentos.
         docs_orm = self.db.query(DocumentORM).filter(DocumentORM.owner_id == owner_id).all()
         return [self._to_domain(d) for d in docs_orm]
 
     def get_all_by_task(self, task_id: int) -> list[Document]:
+        # Mismo principio: filtra por task_id (también indexado),
+        # devolviendo solo los documentos asociados a esa tarea.
+        # Los documentos con task_id=None (sin tarea asociada) nunca
+        # aparecen en este resultado.
         docs_orm = self.db.query(DocumentORM).filter(DocumentORM.task_id == task_id).all()
         return [self._to_domain(d) for d in docs_orm]
 
@@ -59,6 +77,12 @@ class SQLAlchemyDocumentRepository(DocumentRepository):
         return True
 
     def _to_domain(self, document_orm: DocumentORM) -> Document:
+        """
+        Convierte un DocumentORM (fila de la base de datos) en un
+        Document de dominio (Pydantic) — la misma función "traductora"
+        que existe en los otros dos repositorios reales, para que el
+        resto del sistema siempre reciba objetos de dominio limpios.
+        """
         return Document(
             id=document_orm.id,
             title=document_orm.title,
