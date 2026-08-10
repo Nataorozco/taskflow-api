@@ -7,6 +7,7 @@ from app.infrastructure.orm_models.user_orm import UserORM
 class SQLAlchemyUserRepository(UserRepository):
     """
     Implementación real del UserRepository, usando SQLAlchemy y Postgres.
+    Mismo patrón que SQLAlchemyTaskRepository.
     """
 
     def __init__(self, db: Session):
@@ -40,6 +41,10 @@ class SQLAlchemyUserRepository(UserRepository):
         return self._to_domain(user_orm) if user_orm else None
 
     def get_by_email(self, email: str) -> User | None:
+        # A diferencia de la versión en memoria (que recorre todos los
+        # usuarios uno por uno), aquí Postgres usa el índice que
+        # definimos en UserORM.email — mucho más eficiente cuando la
+        # tabla crece a miles de usuarios.
         user_orm = self.db.query(UserORM).filter(UserORM.email == email).first()
         return self._to_domain(user_orm) if user_orm else None
 
@@ -52,6 +57,7 @@ class SQLAlchemyUserRepository(UserRepository):
         return True
 
     def _to_domain(self, user_orm: UserORM) -> User:
+        """Convierte un UserORM en un User de dominio (Pydantic)."""
         return User(
             id=user_orm.id,
             email=user_orm.email,
