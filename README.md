@@ -10,6 +10,21 @@ tradicional con un pipeline de agentes de IA capaces de analizar tareas,
 resumir documentos, generar recordatorios inteligentes y planificar flujos 
 de trabajo a partir de una meta.
 
+## 💡 ¿Por qué importa?
+
+La mayoría de herramientas de gestión de tareas solo almacenan datos — el usuario sigue haciendo todo el trabajo de pensar: priorizar, resumir, recordar, planificar. TaskFlow va un paso más allá: integra agentes de IA directamente en el flujo de trabajo para automatizar ese esfuerzo mental.
+
+**Beneficios concretos:**
+- ⏱️ **Ahorra tiempo real** — en vez de leer un documento completo, `DocumentSummarizerAgent` entrega el resumen y los puntos clave en segundos.
+- 🎯 **Reduce tareas olvidadas o mal priorizadas** — `TaskAnalyzerAgent` y `ReminderAgent` automatizan juicios que normalmente dependen de que una persona esté atenta todo el día.
+- 🗺️ **Acelera la planificación** — `WorkflowPlannerAgent` convierte una meta ambigua ("lanzar mi producto antes de diciembre") en una lista de pasos concretos, sin partir de una hoja en blanco.
+- 🔌 **Es una API, no una app cerrada** — cualquier empresa puede integrar estas capacidades dentro de su propio sistema (su CRM, su herramienta interna, su producto), en vez de depender de una herramienta externa de terceros.
+
+**Casos de uso:**
+- Equipos pequeños que necesitan gestión de tareas con automatización, sin pagar por herramientas enterprise complejas.
+- Empresas que quieren agregar capacidades de IA a su propio software interno, consumiendo esta API en vez de construir agentes desde cero.
+- Uso personal: automatizar la gestión de tareas y proyectos propios.
+
 ## 🏗️ Arquitectura
 
 - Clean Architecture + Service Layer + Repository Pattern
