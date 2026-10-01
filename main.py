@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api.routers import task_router
+from app.api.routers import task_router, user_router
 
 # FastAPI() crea la aplicación en sí. title y description aparecen
 # automáticamente en la documentación interactiva que FastAPI genera
@@ -15,6 +15,7 @@ app = FastAPI(
 # prefix="/tasks" definido en sí mismo, las rutas finales quedan como
 # /tasks, /tasks/{task_id}, etc. — sin repetir el prefijo aquí.
 app.include_router(task_router.router)
+app.include_router(user_router.router)
 
 
 @app.get("/")
