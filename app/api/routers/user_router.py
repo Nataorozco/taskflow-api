@@ -4,6 +4,7 @@ from app.api.dependencies import get_user_repository
 from app.api.schemas.user_schemas import UserCreate, UserResponse
 from app.domain.models.user import User
 from app.domain.repositories.user_repository import UserRepository
+from app.core.security import hash_password
 
 
 # Agrupa las rutas de usuarios bajo /users para que la aplicación
@@ -22,11 +23,13 @@ def create_user(
     sale por la API; el algoritmo seguro se incorporará con autenticación.
     """
     user = User(
-        email=user_data.email,
-        full_name=user_data.full_name,
-        hashed_password=f"hashed_{user_data.password}",
-    )
+            email=user_data.email,
+            full_name=user_data.full_name,
+            hashed_password=hash_password(user_data.password),
+        )
+    
     return repo.save(user)
+    
 
 
 @router.get("/{user_id}", response_model=UserResponse)
