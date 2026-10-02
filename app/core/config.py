@@ -21,3 +21,8 @@ DB_PORT = os.getenv("DB_PORT", "5432")
 # el patrón "if not ANTHROPIC_API_KEY" en cada uno de los 4 agentes.
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 LLM_MODEL = os.getenv("LLM_MODEL", "claude-sonnet-4-6")
+
+# Configuración para autenticación JWT
+SECRET_KEY = os.getenv("SECRET_KEY", "")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
