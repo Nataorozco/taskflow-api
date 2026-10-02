@@ -57,7 +57,7 @@ La mayoría de herramientas de gestión de tareas solo almacenan datos — el us
 - [x] Código completamente comentado, explicando el porqué de cada decisión
 
 **Pendiente:**
-- [ ] Endpoints CRUD de User y Document
+- [x] Endpoints CRUD de User y Document
 - [ ] Autenticación (login, JWT)
 - [ ] Integración real con Claude (prompts maestros + implementación de 
       _call_llm() en cada agente)
