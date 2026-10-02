@@ -5,6 +5,8 @@ from app.infrastructure.repositories.sqlalchemy_task_repository import SQLAlchem
 from app.domain.repositories.task_repository import TaskRepository
 from app.infrastructure.repositories.sqlalchemy_user_repository import SQLAlchemyUserRepository
 from app.domain.repositories.user_repository import UserRepository
+from app.infrastructure.repositories.sqlalchemy_document_repository import SQLAlchemyDocumentRepository
+from app.domain.repositories.document_repository import DocumentRepository
 
 
 def get_task_repository(db: Session = Depends(get_db)) -> TaskRepository:
@@ -38,3 +40,14 @@ def get_user_repository(db: Session = Depends(get_db)) -> UserRepository:
     interfaz abstracta para que los endpoints no dependan de SQLAlchemy.
     """
     return SQLAlchemyUserRepository(db)
+
+
+def get_document_repository(db: Session = Depends(get_db)) -> DocumentRepository:
+    """
+    Dependencia de FastAPI que entrega un DocumentRepository listo para usar
+    a cualquier endpoint que lo necesite.
+
+    Recibe la sesión de base de datos mediante get_db y devuelve la
+    interfaz abstracta para que los endpoints no dependan de SQLAlchemy.
+    """
+    return SQLAlchemyDocumentRepository(db)
