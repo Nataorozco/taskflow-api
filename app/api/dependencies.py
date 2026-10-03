@@ -7,6 +7,9 @@ from app.infrastructure.repositories.sqlalchemy_user_repository import SQLAlchem
 from app.domain.repositories.user_repository import UserRepository
 from app.infrastructure.repositories.sqlalchemy_document_repository import SQLAlchemyDocumentRepository
 from app.domain.repositories.document_repository import DocumentRepository
+from fastapi import HTTPException
+from fastapi.security import OAuth2PasswordBearer
+from app.core.security import decode_access_token
 
 
 def get_task_repository(db: Session = Depends(get_db)) -> TaskRepository:
@@ -51,3 +54,33 @@ def get_document_repository(db: Session = Depends(get_db)) -> DocumentRepository
     interfaz abstracta para que los endpoints no dependan de SQLAlchemy.
     """
     return SQLAlchemyDocumentRepository(db)
+
+
+
+# OAuth2PasswordBearer le dice a FastAPI cómo esperar el token: en el
+# header "Authorization: Bearer <token>". tokenUrl apunta al endpoint
+# de login — esto es lo que hace que el botón "Authorize" de /docs
+# sepa a dónde enviar las credenciales para obtener un token.
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+
+
+def get_current_user(token: str = Depends(oauth2_scheme)) -> int:
+    """
+    Dependencia que protege endpoints: exige un token JWT válido y
+    devuelve el id del usuario autenticado.
+
+    Cualquier endpoint que incluya esta dependencia (vía
+    Depends(get_current_user)) automáticamente:
+    1. Exige que la petición traiga un token Bearer
+    2. Verifica que el token sea válido y no haya expirado
+    3. Si todo está bien, entrega el user_id real — listo para
+       reemplazar el TEMP_OWNER_ID fijo que se usaba antes
+    """
+    user_id = decode_access_token(token)
+    if user_id is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Token inválido o expirado",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return user_id
