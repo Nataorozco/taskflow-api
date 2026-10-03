@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api.routers import document_router, task_router, user_router
+from app.api.routers import task_router, user_router, document_router, auth_router
 
 # FastAPI() crea la aplicación en sí. title y description aparecen
 # automáticamente en la documentación interactiva que FastAPI genera
@@ -10,13 +10,14 @@ app = FastAPI(
     version="0.1.0",
 )
 
-# include_router "monta" todos los endpoints definidos en task_router.py
-# dentro de la aplicación principal. Como task_router ya tiene
-# prefix="/tasks" definido en sí mismo, las rutas finales quedan como
-# /tasks, /tasks/{task_id}, etc. — sin repetir el prefijo aquí.
+# include_router "monta" todos los endpoints definidos en cada router
+# dentro de la aplicación principal. Como cada router ya tiene su
+# propio prefix (/tasks, /users, /documents, /auth) definido en sí
+# mismo, las rutas finales quedan completas sin repetir el prefijo aquí.
 app.include_router(task_router.router)
 app.include_router(user_router.router)
 app.include_router(document_router.router)
+app.include_router(auth_router.router)
 
 
 @app.get("/")
